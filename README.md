@@ -1,43 +1,57 @@
-# gulp-fontmin-wrapper
-Samelessly integrate `Fontmin` with gulp.
+# gulp-handlebars-pot
+Extract i18n text from handlebars templates using gettext functions(_, n_, p_, np_)
 
 # how to use
 
 ```
 ...
+// task tested under gulp 4.0
 var foo = require('gulp-foo'),
-    fontminWrapper = require('gulp-fontmin-wrapper'),
+    fontminWrapper = require('gulp-handlebars-pot'),
     bar = require('gulp-bar');
 
-gulp.task('fontmin', function () {
-  // define the files to be searched for the chinese glyphs.
-  var srcFiles = [
-      path.join(tplRoot, '**/*.html'),
-      path.join(tplRoot, '**/*.hbs'),
-      path.join(assetRoot, './js/**/*.js')
-  ];
+function createHbsPotTask () {
+    var hbsBase = path.join(tplRoot, 'hbs'),
+        hbsSrc = path.join(hbsBase, '**/*.hbs');
 
-  // all the src files MUST be plain text with 'utf-8' encoding, so that
-  // from them the Chinese glyphs can be correctly extracted.
-  gulp.src(srcFiles)
-    .pipe(fontminWrapper({
-        // how to extract the chinese glyphs. by default it keeps `u4e00-u9fa5` and drop all others.
-        // extractionAlgorithm: function (text) {return text.replace('foo', 'bar');},
-        fontPath: path.join(assetRoot, 'libs/zh-CN-fonts/PingFang.ttf'),
-        // depends on whether this font supports those glyphs or not.
-        mustHaveGlyphs: '。？！，、；：“”‘’─…—·（）《》〈〉【】〔〕「」『』～￥'
-    }))
-    .pipe(gulp.dest(path.join(assetRoot, 'fonts/PingFang';
-});
+    return gulp.src(hbsSrc)
+        .pipe(plumber())
+        .pipe(gettextHbs({
+            // /path/to/your/hbs/templates
+            hbsBasePath: path.join(tplRoot, 'hbs'),
+            domain: 'My Fancy i18n-supported Project'
+        }))
+        .pipe(gulp.dest(
+            path.join(projRoot, 'i18n/translation-handlebars.pot')
+        ));
+}
+
+gulp.task('create-hbs-pot', createHbsPotTask);
+
 ```
 
 # FAQs
 
-1. Some glyphs is missing, such as some punctuations.
+1. How do I use this 'pot' file?
 
-  you can define the missing glyphs in `mustHaveGlyphs` option, if it doesn't work, that probably means the font itself doesn't have those glyphs included.
+  You can use some i18n editor like 'Poedit' to generate po/mo file from the pot
+  file and translate the po files.
 
-2. How can I verify if the new font is been using(rendering)?
+  After po files been translated, consider using `po2json` or something else to
+  compile it into javascript recognizable format, then use `Jed` to load the translation data into your i18n-ed APP.
 
-  open Chrome development tools and switch to `Elements - Computed` panel, at the bottom there will be one column called "Rendered Fonts", my result is "OTS derived font—6 glyphs", which means Chrome rendered 6 glyphs using the font I just generated.
+2. But it's still not working...
 
+  You need to have the four extractor function defined as helpers in Handlebars runtime, something like:
+
+  ```
+  jed_instance = new Jed({
+    localedata: from `po2json` in previous step
+  });
+
+  Handlebars.registerHelper('_', function(){
+    jed_instance.fetch('a fancy i18n string')
+  })
+  ```
+
+  after that, 
