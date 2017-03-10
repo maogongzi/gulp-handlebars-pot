@@ -1,0 +1,39 @@
+{
+  "name": "gulp-handlebars-pot",
+  "version": "1.0.0",
+  "description": "Extract i18n strings from handlebars templates and compile them into 'pot' files.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maverickpuss/gulp-handlebars-pot.git"
+  },
+  "author": {
+    "name": "Dylan Mao",
+    "email": "maverickpuss@gmail.com"
+  },
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    "i18n",
+    "handlebars",
+    "poedit",
+    "pot",
+    "po",
+    "gettext",
+    "_",
+    "n_",
+    "p_",
+    "np_",
+    "ngettext",
+    "pgettext",
+    "npgettext"
+  ],
+  "dependencies": {
+    "gulp-util": "^3.0.0",
+    "through2": "^2.0.0",
+    "globby": "^6.1.0",
+    "path-sort": "^0.1.0",
+    "gettext-handlebars": "0.7.0"
+  }
+}
